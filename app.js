@@ -29,7 +29,7 @@ app.use("/api",userRoutes);
 
 
 //database
-mongoose.connect('mongodb+srv://kripeshneupane10:10neupanekripesh@kripeshneupane10.6yv5nqj.mongodb.net/',{
+mongoose.connect(process.env.DATABASE,{
     useNewUrlParser:true,
     ssl:true,
    }).then(()=> console.log('DB Connected')); 
