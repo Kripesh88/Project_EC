@@ -4,6 +4,7 @@ const mongoose=require('mongoose');
 const morgan=require('morgan')
 const bodyParser= require('body-parser')
 const cookieParser= require('cookie-parser')
+const expressValidator=require('express-validator')
 
 
 //import routes
@@ -18,6 +19,7 @@ const app=express()
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(expressValidator());
 
 
 
@@ -32,7 +34,7 @@ app.use("/api",userRoutes);
 mongoose.connect(process.env.DATABASE,{
     useNewUrlParser:true,
     ssl:true,
-   }).then(()=> console.log('DB Connected')); 
+   }).then(()=> console.log('DATABASE CONNECTED')); 
 
 
 

@@ -1,9 +1,13 @@
 const express=require('express');
 const router= express.Router();
 
-const{ signup }= require("../controllers/user");
+const{ signup,signin }= require("../controllers/user");
 
-router.post("/signup",signup);  //using controller
+const{ userSignupValidator }=require('../validator/index');
+
+
+router.post("/signup",userSignupValidator, signup); 
+router.post("/signin", signin);  //using controller
  
 // router.get('/', (req,res)=> {                     //without using controller we can access the data through it
 //     res.send("Hello from MERN Stack");
