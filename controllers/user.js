@@ -41,24 +41,50 @@ exports.signup = async (req, res) => {
 };
 
 
-exports.signin=(req,res)=>{
+exports.signin=async(req,res)=>{
     //find the user based on email.
-    const{email,password} =req.body;
-    User.findOne({email}, ()=>{
-        if(err || !user){
+    const{ email:loginEmail,password} =req.body;
+
+    User.findOne({ email:loginEmail })
+    .then(User => {
+        if (!User) {
             return res.status(400).json({
-                err:"User with that email doesnt exist. Please Signup."
+                err: "User with that email doesn't exist. Please Signup."
             });
-             
-            //if user is found, We make sure that email and password match 
-            //create authenticate method in user model.
-            if(!user.authenticate(password)){
-                return res.status(401).json({
-                    error:'Email and password dont match'
-                });
-            }
+        }
+        
+        // If user is found, we make sure that email and password match
+        // Create authenticate method in user model.
+        if (!User.authenticate(password)) {
+            return res.status(401).json({
+                error: 'Email and password dont match'
+            });
+        }
+        
+        // Proceed with your logic for successful authentication here
+        // For example, you might generate a token and send it in the response
+    })
+    
+    // User.findOne({email}, ()=>{
+        //     if(err || !user){
+            //         return res.status(400).json({
+                //             err:"User with that email doesnt exist. Please Signup."
+                //         });
+                
+    //         //if user is found, We make sure that email and password match 
+    //         //create authenticate method in user model.
+    //         if(!user.authenticate(password)){
+        .catch(err => {
+            return res.status(500).json({
+                error: 'Something went wrong'
+            });
+        });
+    //             return res.status(401).json({
+    //                 error:'Email and password dont match'
+    //             });
+    //         }
             //generate a signed token with userID and secret
-            const token=jwt.sign({id: user._id}, process.env.JWT_SECRET)
+            const token=jwt.sign({id: User._id}, process.env.JWT_SECRET);
 
             //persist the token as 't' in cookie with expiry date
 
@@ -66,12 +92,18 @@ exports.signin=(req,res)=>{
             
             //return response with user and token to frontend client
             
-            const{_id, name,email,role}=user
-            return res.json({token, user:{_id,email,name,role}});
+            const{_id, name, email:_loginEmail,role}=User
+            return res.json({token, User:{_id,email:loginEmail,name,role}});
 
             
 
 
         };
-    });
+
+
+//FOR SIGNOUT
+exports.signout= (req,res)=>{
+    res.clearCookie("t");
+    res.json({message: 'Signout Successful'});
+
 };
