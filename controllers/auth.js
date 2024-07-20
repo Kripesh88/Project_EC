@@ -1,6 +1,7 @@
 const User=require('../models/user');
 const jwt=require('jsonwebtoken');//to generate signed token 
-const expressJwt=require('express-jwt'); //authorization check 
+const expressJwt=require('express-jwt'); //for authorization
+require('dotenv').config(); //load environment variables from .env file
 const {errorHandler} = require('../helpers/dbErrorHandler');
 
 
@@ -97,13 +98,26 @@ exports.signin=async(req,res)=>{
 
             
 
-
+            
         };
-
-
-//FOR SIGNOUT
-exports.signout= (req,res)=>{
-    res.clearCookie("t");
-    res.json({message: 'Signout Successful'});
-
-};
+        
+        
+       
+    
+    
+        
+        
+        //for SIGNOUT
+        exports.signout= (req,res)=>{
+            res.clearCookie("t");
+            res.json({message: 'Signout Successful'});
+        };
+        
+        
+        
+        //Protecting routes
+        exports.requireSignin=expressJwt.expressjwt({
+                secret:process.env.JWT_SECRET,
+                algorithms: ["HS256"], 
+                userProperty:"auth",
+        });

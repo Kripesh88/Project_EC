@@ -8,7 +8,7 @@ const expressValidator=require('express-validator')
 
 
 //import routes
-const userRoutes= require('./routes/user');
+const userRoutes= require('./routes/auth');
 
 
 
