@@ -42,7 +42,10 @@ exports.signup = async (req, res) => {
 };
 
 
-exports.signin=async(req,res)=>{
+
+
+
+/*exports.signin=async(req,res)=>{
     //find the user based on email.
     const{ email:loginEmail,password} =req.body;
 
@@ -93,15 +96,51 @@ exports.signin=async(req,res)=>{
             
             //return response with user and token to frontend client
             
-            const{_id, name, email:_loginEmail,role}=User
+            const{_id, email:_loginEmail,name, role}=User;
             return res.json({token, User:{_id,email:loginEmail,name,role}});
-
+            
             
 
             
         };
         
+   */
+        exports.signin = async (req, res) => {
+            const { email: loginEmail, password } = req.body;
         
+            try {
+                const user = await User.findOne({ email: loginEmail });
+        
+                if (!user) {
+                    return res.status(400).json({
+                        err: "User with that email doesn't exist. Please Signup."
+                    });
+                }
+        
+                // If user is found, we make sure that email and password match
+                // Create authenticate method in user model.
+                if (!user.authenticate(password)) {
+                    return res.status(401).json({
+                        error: 'Email and password dont match'
+                    });
+                }
+        
+                // Generate a signed token with user ID and secret
+                const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+        
+                // Persist the token as 't' in cookie with expiry date
+                res.cookie('t', token, { expire: new Date() + 9999 });
+        
+                // Return response with user and token to frontend client
+                const { _id, email, name, role } = user;
+                return res.json({ token, user: { _id, email, name, role } });
+        
+            } catch (err) {
+                return res.status(500).json({
+                    error: 'Something went wrong'
+                });
+            }
+        };     
        
     
     
@@ -121,3 +160,23 @@ exports.signin=async(req,res)=>{
                 algorithms: ["HS256"], 
                 userProperty:"auth",
         });
+
+        //For RequireSignIn
+        exports.requireSignin = (req, res, next) => {
+            const token = req.cookies.t;
+            if (!token) {
+                return res.status(401).json({
+                    error: "Unauthorized access"
+                });
+            }
+        
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                req.user = decoded;
+                next();
+            } catch (err) {
+                return res.status(401).json({
+                    error: "Invalid token"
+                });
+            }
+        };

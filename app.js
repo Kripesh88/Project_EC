@@ -8,7 +8,9 @@ const expressValidator=require('express-validator')
 
 
 //import routes
-const userRoutes= require('./routes/auth');
+const userRoutes= require('./routes/user');
+
+const authRoutes=require('./routes/auth'); 
 
 
 
@@ -27,13 +29,14 @@ app.use(expressValidator());
 
 
 //routes middleware 
+app.use("/api",authRoutes);
 app.use("/api",userRoutes);
 
 
 //database
 mongoose.connect(process.env.DATABASE,{
     useNewUrlParser:true,
-    ssl:true,
+    //ssl:true,
    }).then(()=> console.log('DATABASE CONNECTED')); 
 
 
