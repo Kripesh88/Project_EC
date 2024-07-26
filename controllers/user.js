@@ -5,7 +5,7 @@ const User=require('../models/user')
  
 
 // Define userByID function using async/await
-exports.userByID = async (req, res, next, id) => {
+exports.userByID = async (req, res, next,id) => {
     try {
         const user = await User.findById(id).exec();
         if (!user) {

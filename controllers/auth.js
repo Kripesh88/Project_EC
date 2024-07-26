@@ -160,18 +160,21 @@ exports.signup = async (req, res) => {
                 algorithms: ["HS256"], 
                 userProperty:"auth",
         });
-
         //For RequireSignIn
         exports.requireSignin = (req, res, next) => {
-            const token = req.cookies.t;
+            // const token = req.cookies.t;
+            // authorization: "Bearer token"
+            const token = req.headers['authorization'].split(" ")[1]
+            console.log(token)
             if (!token) {
                 return res.status(401).json({
                     error: "Unauthorized access"
                 });
             }
-        
+            
             try {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                console.log(decoded)
                 req.user = decoded;
                 next();
             } catch (err) {
@@ -180,3 +183,24 @@ exports.signup = async (req, res) => {
                 });
             }
         };
+        
+        exports.isAuth= (req,res,next) => {
+            let user=req.profile && req.user && req.profile._id.toString() ==req.user.id;
+            if(!user){
+                return res.status(403).json({
+                    error: "Access Denied"
+                })
+            }
+            next();
+        };
+
+        exports.isAdmin= (req,res,next) => {
+            if(req.profile.role === 1 ){ //Changed
+                res.status(403).json({
+                    error:"Admin resource!! Access Denied"
+                });
+            }
+            next();
+        };
+        
+        
