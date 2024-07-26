@@ -195,8 +195,8 @@ exports.signup = async (req, res) => {
         };
 
         exports.isAdmin= (req,res,next) => {
-            if(req.profile.role === 1 ){ //Changed
-                res.status(403).json({
+            if(req.profile.role === 0 ){ //Changed   //0 or 1
+                 res.status(403).json({
                     error:"Admin resource!! Access Denied"
                 });
             }

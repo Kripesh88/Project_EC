@@ -8,9 +8,11 @@ const expressValidator=require('express-validator')
 
 
 //import routes
-const userRoutes= require('./routes/user');
+const userRoutes= require('./routes/user'); //for user
 
-const authRoutes=require('./routes/auth'); 
+const authRoutes=require('./routes/auth'); //for authentication
+
+const categoryRoutes= require('./routes/category'); //for category 
 
 
 
@@ -31,6 +33,7 @@ app.use(expressValidator());
 //routes middleware 
 app.use("/api",authRoutes);
 app.use("/api",userRoutes);
+app.use("/api",categoryRoutes);
 
 
 //database
