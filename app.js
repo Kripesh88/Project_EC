@@ -14,6 +14,8 @@ const authRoutes=require('./routes/auth'); //for authentication
 
 const categoryRoutes= require('./routes/category'); //for category 
 
+const productRoutes= require ("./routes/product"); //for product
+
 
 
 //app
@@ -34,11 +36,13 @@ app.use(expressValidator());
 app.use("/api",authRoutes);
 app.use("/api",userRoutes);
 app.use("/api",categoryRoutes);
+app.use("/api",productRoutes);
 
 
 //database
 mongoose.connect(process.env.DATABASE,{
     useNewUrlParser:true,
+    
     //ssl:true,
    }).then(()=> console.log('DATABASE CONNECTED')); 
 
