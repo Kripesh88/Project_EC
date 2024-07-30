@@ -4,6 +4,8 @@ const fs=require('fs');
 const path=require('path');
 const Product = require("../models/product");
 const { errorHandler }=require("../helpers/dbErrorHandler");
+const { type } = require('os');
+
 
 
 exports.create=(req,res)=>{
@@ -25,7 +27,12 @@ exports.create=(req,res)=>{
     // multiples: true, // allow multiple files
     // uploadDir: 'path_to_temp_directory' // specify an upload directory //max size limit=10MB
 
-    
+    // const{name,description,price, category,quantity,shipping}=fields;
+    // if(!name|| !description || !price || !category || !quantity ||!shipping){
+    //     return res.status(400).json({
+    //         error:"All the fields are required"
+    //     });
+    // };
     form.parse(req,(err,fields,files)=>{
         console.error("Formidable error: ",err);
         if(err){
@@ -35,6 +42,8 @@ exports.create=(req,res)=>{
         }
         console.log("Fields:", fields);
         console.log("Files:", files);
+        console.log("path: ",path);
+     
 
         let product= new Product(fields);
 
@@ -45,14 +54,25 @@ exports.create=(req,res)=>{
             // Ensure the photo object is correctly accessed
             const photo = Array.isArray(files.photo) ? files.photo[0] : files.photo;
             
+            
+            if (!photo || !photo.path) {
+                return res.status(400).json({
+                    error: 'File path is missing. Please ensure the file is properly uploaded.'
+                });
+            }
 
-            console.log("Photo object:", photo); // Log photo object for debugging
+            console.log('Photo object:', photo);
+            console.log('Photo path:', photo.filepath);
+            console.log('Photo type:', photo.mimetype);
+            
+
+            // console.log("Photo object:", photo); // Log photo object for debugging
 
             
 
-            // Add extra logging for photo object properties
-            console.log("Photo path:", photo.path);
-            console.log("Photo type:", photo.type);
+            // // Add extra logging for photo object properties
+            // console.log("Photo path:", photo.path);
+            // console.log("Photo type:", photo.type);
            
                 // if (!files.photo.path) {
                 //     return res.status(400).json({
@@ -62,8 +82,8 @@ exports.create=(req,res)=>{
             try{
             // product.photo.data= fs.readFileSync(files.photo.path);
             // product.photo.contentType=files.photo.type;
-            product.photo.data = fs.readFileSync(files.photo.path);
-            product.photo.contentype = files.photo.type;
+            product.photo.data = fs.readFileSync(files.photo.filepath);
+            product.photo.contentype = files.photo.mimetype;
         }catch(readError){
             console.error("File system error: ", readError);
                 return res.status(400).json({

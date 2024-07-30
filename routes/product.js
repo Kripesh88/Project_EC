@@ -20,6 +20,8 @@ router.param("userID",userByID);
 
 
 
+
+
  
 // router.get('/', (req,res)=> {                     //without using controller we can access the data through it
 //     res.send("Hello from MERN Stack");
