@@ -1,107 +1,118 @@
-const formidable=require('formidable');
-const _ = require("lodash");
-const fs=require('fs');
-const path=require('path');
-const Product = require("../models/product");
-const { errorHandler }=require("../helpers/dbErrorHandler");
-const { type } = require('os');
+// const formidable=require('formidable');
+// const _ = require("lodash");
+// const fs=require('fs');
+// const path=require('path');
+// const Product = require("../models/product");
+// const { errorHandler }=require("../helpers/dbErrorHandler");
+// const { type } = require('os');
 
 
 
-exports.create=(req,res)=>{
-    const uploadDir = path.join(__dirname, '../uploads');
+// exports.create=(req,res)=>{
+//     const uploadDir = path.join(__dirname, '../uploads');
 
-    // Ensure the uploads directory exists
-    if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    let form=new formidable.IncomingForm({
-    keepExtensions:true,
-    maxFileSize:10*1024*1024,
-    multiples: true, // allow multiple files
-    uploadDir: uploadDir // specify an upload directory //max size limit=10MB
+//     // Ensure the uploads directory exists
+//     if (!fs.existsSync(uploadDir)) {
+//         fs.mkdirSync(uploadDir, { recursive: true });
+//     }
+//     let form=new formidable.IncomingForm({
+//     keepExtensions:true,
+//     maxFileSize:10*1024*1024,
+//     multiples: true, // allow multiple files
+//     uploadDir: uploadDir // specify an upload directory //max size limit=10MB
 
-    });
-    // form.keepExtensions=true;
-    // form.maxFileSize= 10*1024*1024;
-    // multiples: true, // allow multiple files
-    // uploadDir: 'path_to_temp_directory' // specify an upload directory //max size limit=10MB
+//     });
+//     // form.keepExtensions=true;
+//     // form.maxFileSize= 10*1024*1024;
+//     // multiples: true, // allow multiple files
+//     // uploadDir: 'path_to_temp_directory' // specify an upload directory //max size limit=10MB
 
-    // const{name,description,price, category,quantity,shipping}=fields;
-    // if(!name|| !description || !price || !category || !quantity ||!shipping){
-    //     return res.status(400).json({
-    //         error:"All the fields are required"
-    //     });
-    // };
-    form.parse(req,(err,fields,files)=>{
-        console.error("Formidable error: ",err);
-        if(err){
-            return res.status(400).json({
-                error:"Image could not be uploaded"
-            })
-        }
-        console.log("Fields:", fields);
-        console.log("Files:", files);
-        console.log("path: ",path);
+//     // const{name,description,price, category,quantity,shipping}=fields;
+//     // if(!name|| !description || !price || !category || !quantity ||!shipping){
+//     //     return res.status(400).json({
+//     //         error:"All the fields are required"
+//     //     });
+//     // };
+//     form.parse(req,(err,fields,files)=>{
+//         console.error("Formidable error: ",err);
+//         if(err){
+//             return res.status(400).json({
+//                 error:"Image could not be uploaded"
+//             })
+//         }
+//         console.log("Fields:", fields);
+//         console.log("Files:", files);
+//         console.log("path: ",path);
      
 
-        let product= new Product(fields);
+//         let product= new Product(fields);
 
-        if(files.photo){
+//         if(files.photo){
             
-            console.log("FILES PHOTO:", files.photo);
+//             console.log("FILES PHOTO:", files.photo);
 
-            // Ensure the photo object is correctly accessed
-            const photo = Array.isArray(files.photo) ? files.photo[0] : files.photo;
+//             // Ensure the photo object is correctly accessed
+//             const photo = Array.isArray(files.photo) ? files.photo[0] : files.photo;
             
             
-            if (!photo || !photo.path) {
-                return res.status(400).json({
-                    error: 'File path is missing. Please ensure the file is properly uploaded.'
-                });
-            }
+//             if (!photo || !photo.filepath) {
+//                 return res.status(400).json({
+//                     error: 'File path is missing. Please ensure the file is properly uploaded.'
+//                 });
+//             }
 
-            console.log('Photo object:', photo);
-            console.log('Photo path:', photo.filepath);
-            console.log('Photo type:', photo.mimetype);
-            
-
-            // console.log("Photo object:", photo); // Log photo object for debugging
-
+//             console.log('Photo object:', photo);
+//             console.log('Photo path:', photo.filepath);
+//             console.log('Photo type:', photo.mimetype);
             
 
-            // // Add extra logging for photo object properties
-            // console.log("Photo path:", photo.path);
-            // console.log("Photo type:", photo.type);
+//             // console.log("Photo object:", photo); // Log photo object for debugging
+
+            
+
+//             // // Add extra logging for photo object properties
+//             // console.log("Photo path:", photo.path);
+//             // console.log("Photo type:", photo.type);
            
-                // if (!files.photo.path) {
-                //     return res.status(400).json({
-                //         error: "File path is missing. Please ensure the file is properly uploaded."
-                //     });
-                // }
-            try{
-            // product.photo.data= fs.readFileSync(files.photo.path);
-            // product.photo.contentType=files.photo.type;
-            product.photo.data = fs.readFileSync(files.photo.filepath);
-            product.photo.contentype = files.photo.mimetype;
-        }catch(readError){
-            console.error("File system error: ", readError);
-                return res.status(400).json({
-                    error: "Image could not be uploaded"
-                });
-        }
-    }
+//                 // if (!files.photo.path) {
+//                 //     return res.status(400).json({
+//                 //         error: "File path is missing. Please ensure the file is properly uploaded."
+//                 //     });
+//                 // }
+//             try{
+//             // product.photo.data= fs.readFileSync(files.photo.path);
+//             // product.photo.contentType=files.photo.type;
+//             product.photo.data = fs.readFileSync(photo.filepath);
+//             product.photo.contentType = photo.mimetype;
+//         }catch(readError){
+//             console.error("File system error: ", readError);
+//                 return res.status(400).json({
+//                     error: "Image could not be uploaded"
+//                 });
+//         }
+//     }
 
-        product.save((err,result)=>{
-            if(err){
-                return res.status(400).json({
-                    error: errorHandler(err) 
-                });
-            }
-            res.json(result);
-        });
-    });
-};
+//         // product.save((err,result)=>{
+//         //     if(err){
+//         //         return res.status(400).json({
+//         //             error: errorHandler(err) 
+//         //         });
+//         //     }
+//         //     res.json(result);
+//         // });
+    //     product.save()
+    // .then(result => {
+    //     res.json(result);
+    // })
+    // .catch(err => {
+    //     console.error("Error saving product: ", err);
+    //     res.status(400).json({
+    //         error: errorHandler(err)
+    //     });
+    // });
+//     });
+// };
+
 
 
 
@@ -140,3 +151,70 @@ exports.create = (req, res) => {
         });
 };
 */
+const formidable = require('formidable');
+const _ = require('lodash');
+const fs = require('fs');
+const Product = require('../models/product');
+const { errorHandler } = require("../helpers/dbErrorHandler");
+
+exports.create = (req, res) => {
+    let form = new formidable.IncomingForm();
+    form.keepExtensions = true;
+    form.parse(req, (err, fields, files) => {
+        if (err) {
+            return res.status(400).json({
+                error: 'Image couldn\'t be uploaded'
+            });
+        }
+
+        // Convert form fields to correct types
+        fields.name = Array.isArray(fields.name) ? fields.name[0] : fields.name;
+        fields.description = Array.isArray(fields.description) ? fields.description[0] : fields.description;
+        fields.price = Array.isArray(fields.price) ? parseFloat(fields.price[0]) : parseFloat(fields.price);
+        fields.quantity = Array.isArray(fields.quantity) ? parseInt(fields.quantity[0], 10) : parseInt(fields.quantity, 10);
+        fields.shipping = Array.isArray(fields.shipping) ? (fields.shipping[0] === 'true') : (fields.shipping === 'true');
+
+        let product = new Product(fields);
+
+        if (files.photo && Array.isArray(files.photo) && files.photo.length > 0) {
+            let photo = files.photo[0]; // Access the first element of the array
+            if (typeof photo.filepath === 'string' && fs.existsSync(photo.filepath)) {
+                try {
+                    product.photo.data = fs.readFileSync(photo.filepath);
+                    product.photo.contentType = photo.mimetype;
+                } catch (readError) {
+                    console.error('Error reading the file:', readError);
+                    return res.status(400).json({
+                        error: 'Failed to read the image file'
+                    });
+                }
+            } else {
+                return res.status(400).json({
+                    error: 'Invalid file path'
+                });
+            }
+        }
+
+        // Validate the product data
+        const validationErrors = product.validateSync();
+        if (validationErrors) {
+            return res.status(400).json({
+                error: 'Validation error',
+                details: validationErrors.errors
+            });
+        }
+        product.save()
+        .then(result => {
+           res.json(result);
+        })
+        .catch(err => {
+           console.error("Error saving product: ", err);
+           res.status(400).json({
+               error: errorHandler(err)
+           });
+        });
+        });
+        };
+
+
+        
