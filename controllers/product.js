@@ -151,11 +151,36 @@ exports.create = (req, res) => {
         });
 };
 */
+
 const formidable = require('formidable');
 const _ = require('lodash');
 const fs = require('fs');
 const Product = require('../models/product');
 const { errorHandler } = require("../helpers/dbErrorHandler");
+
+
+exports.productById = async (req, res, next, id) => {
+    try {
+        const product = await Product.findById(id).exec();
+        if (!product) {
+            return res.status(400).json({
+                error: "Product Not Found"
+            });
+        }
+        req.product = product;
+        next();
+    } catch (err) {
+        return res.status(400).json({
+            error: "Product is Not available"
+        });
+    }
+};
+
+
+exports.read=(req,res)=>{ //for read in routes as route.get
+    req.product.photo= undefined;
+    return res.json(req.product);
+};
 
 exports.create = (req, res) => {
     let form = new formidable.IncomingForm();
@@ -177,6 +202,7 @@ exports.create = (req, res) => {
         let product = new Product(fields);
 
         if (files.photo && Array.isArray(files.photo) && files.photo.length > 0) {
+     
             let photo = files.photo[0]; // Access the first element of the array
             if (typeof photo.filepath === 'string' && fs.existsSync(photo.filepath)) {
                 try {
@@ -215,6 +241,20 @@ exports.create = (req, res) => {
         });
         });
         };
-
+        exports.remove = async (req, res) => {
+            try {
+                let product = req.product;
+                const deletedProduct = await product.deleteOne();
+                res.json({
+                    deletedProduct,
+                    message: "Product Deleted Successfully"
+                });
+            } catch (err) {
+                return res.status(400).json({
+                    error: errorHandler(err)
+                });
+            }
+        };
+        
 
         
