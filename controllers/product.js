@@ -258,3 +258,63 @@ exports.create = (req, res) => {
         
 
         
+        exports.update = (req, res) => {
+            let form = new formidable.IncomingForm();
+            form.keepExtensions = true;
+            form.parse(req, (err, fields, files) => {
+                if (err) {
+                    return res.status(400).json({
+                        error: 'Image couldn\'t be uploaded'
+                    });
+                }
+        
+                // Convert form fields to correct types
+                fields.name = Array.isArray(fields.name) ? fields.name[0] : fields.name;
+                fields.description = Array.isArray(fields.description) ? fields.description[0] : fields.description;
+                fields.price = Array.isArray(fields.price) ? parseFloat(fields.price[0]) : parseFloat(fields.price);
+                fields.quantity = Array.isArray(fields.quantity) ? parseInt(fields.quantity[0], 10) : parseInt(fields.quantity, 10);
+                fields.shipping = Array.isArray(fields.shipping) ? (fields.shipping[0] === 'true') : (fields.shipping === 'true');
+        
+                let product = req.product;
+                product= _.extend(product,fields); //lodash extension used--> two extensions taken
+        
+                if (files.photo && Array.isArray(files.photo) && files.photo.length > 0) {
+             
+                    let photo = files.photo[0]; // Access the first element of the array
+                    if (typeof photo.filepath === 'string' && fs.existsSync(photo.filepath)) {
+                        try {
+                            product.photo.data = fs.readFileSync(photo.filepath);
+                            product.photo.contentType = photo.mimetype;
+                        } catch (readError) {
+                            console.error('Error reading the file:', readError);
+                            return res.status(400).json({
+                                error: 'Failed to read the image file'
+                            });
+                        }
+                    } else {
+                        return res.status(400).json({
+                            error: 'Invalid file path'
+                        });
+                    }
+                }
+        
+                // Validate the product data
+                const validationErrors = product.validateSync();
+                if (validationErrors) {
+                    return res.status(400).json({
+                        error: 'Validation error',
+                        details: validationErrors.errors
+                    });
+                }
+                product.save()
+                .then(result => {
+                   res.json(result);
+                })
+                .catch(err => {
+                   console.error("Error saving product: ", err);
+                   res.status(400).json({
+                       error: errorHandler(err)
+                   });
+                });
+                });
+                };
